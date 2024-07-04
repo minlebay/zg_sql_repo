@@ -1,0 +1,21 @@
+telemetry:
+  enabled: true
+  interval: 10
+  address: localhost:8888
+
+kafka:
+  address: ${ZG_KAFKA_ADDRESS}
+  group_id: nosql_repo
+  user: guest
+  password: guest
+  topic: processing_1
+
+dbs:
+  mysqldbs:
+    - ${ZG_MYSQLDB_1}
+    - ${ZG_MYSQLDB_2}
+
+redis:
+  address: ${ZG_REDIS_ADDRESS}
+  db: ${ZG_REDIS_DB}
+
