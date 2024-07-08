@@ -5,7 +5,7 @@ import (
 )
 
 type Config struct {
-	Dbs []string `yaml:"mongodbs"`
+	Dbs []string `yaml:"mysqldbs"`
 }
 
 func NewRepositoryConfig(provider cfg.Provider) (*Config, error) {
