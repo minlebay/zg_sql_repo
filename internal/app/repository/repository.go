@@ -2,19 +2,18 @@ package repository
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo"
+	"fmt"
+	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 	"sync"
 	"zg_sql_repo/internal/model"
 )
 
 type Repository struct {
-	Config           *Config
-	Logger           *zap.Logger
-	wg               sync.WaitGroup
-	DBs              []*any
-	CancelFunc       context.CancelFunc
-	ClientDisconnect func()
+	Config *Config
+	Logger *zap.Logger
+	wg     sync.WaitGroup
+	DBs    []*gorm.DB
 }
 
 func NewRepository(logger *zap.Logger, config *Config) *Repository {
@@ -27,20 +26,30 @@ func NewRepository(logger *zap.Logger, config *Config) *Repository {
 func (r *Repository) StartRepository(ctx context.Context) {
 	go func() {
 		for _, db := range r.Config.Dbs {
-			_ = db
+			args := fmt.Sprintf(
+				"%s:%s@/%s?charset=utf8&parseTime=True&loc=Local",
+				db.User, db.Password, db.DB,
+			)
+			gdb, err := gorm.Open("mysql", args)
+			if err != nil {
+				r.Logger.Error("Failed to connect to db", zap.Error(err))
+				return
+			}
+			r.DBs = append(r.DBs, gdb)
+
+			// migrations
+
 		}
 	}()
 }
 
 func (r *Repository) StopRepository(ctx context.Context) {
 	r.wg.Wait()
-	r.ClientDisconnect()
-	r.CancelFunc()
 
 	r.Logger.Info("Repo started")
 }
 
-func (r *Repository) GetAll(ctx context.Context, db mongo.Database) ([]*model.Message, error) {
+func (r *Repository) GetAll(ctx context.Context) ([]*model.Message, error) {
 
 	return nil, nil
 }
