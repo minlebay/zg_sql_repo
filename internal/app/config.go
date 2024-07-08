@@ -58,11 +58,28 @@ func convertMapKeysToStrings(m map[interface{}]interface{}) map[string]interface
 		switch val := v.(type) {
 		case map[interface{}]interface{}:
 			newMap[strKey] = convertMapKeysToStrings(val)
+		case []interface{}:
+			newMap[strKey] = convertSliceKeysToStrings(val)
 		default:
 			newMap[strKey] = val
 		}
 	}
 	return newMap
+}
+
+func convertSliceKeysToStrings(val []interface{}) interface{} {
+	newSlice := make([]interface{}, len(val))
+	for i, v := range val {
+		switch v := v.(type) {
+		case map[interface{}]interface{}:
+			newSlice[i] = convertMapKeysToStrings(v)
+		case []interface{}:
+			newSlice[i] = convertSliceKeysToStrings(v)
+		default:
+			newSlice[i] = v
+		}
+	}
+	return newSlice
 }
 
 func replaceEnvVariables(config map[string]interface{}) {

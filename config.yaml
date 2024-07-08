@@ -11,13 +11,15 @@ kafka:
   topic: processing_1
 
 dbs:
-  mysqldbs:
-    - ${MYSQL_DB_1_PORT}
-    - ${MYSQL_DB_2_PORT}
-  mysqlcreds:
-    - ${MYSQL_DATABASE}
-    - ${MYSQL_USER}
-    - ${MYSQL_PASSWORD}
+  - port: ${MYSQL_DB_1_PORT}
+    database: ${MYSQL_DATABASE}
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+
+  - port: ${MYSQL_DB_2_PORT}
+    database: ${MYSQL_DATABASE}
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
 
 redis:
   address: ${ZG_REDIS_ADDRESS}
