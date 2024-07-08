@@ -5,17 +5,20 @@ telemetry:
 
 kafka:
   address: ${ZG_KAFKA_ADDRESS}
-  group_id: nosql_repo
+  group_id: sql_repo
   user: guest
   password: guest
   topic: processing_1
 
 dbs:
   mysqldbs:
-    - ${ZG_MYSQLDB_1}
-    - ${ZG_MYSQLDB_2}
+    - ${MYSQL_DB_1_PORT}
+    - ${MYSQL_DB_2_PORT}
+  mysqlcreds:
+    - ${MYSQL_DATABASE}
+    - ${MYSQL_USER}
+    - ${MYSQL_PASSWORD}
 
 redis:
   address: ${ZG_REDIS_ADDRESS}
   db: ${ZG_REDIS_DB}
-

@@ -18,16 +18,43 @@ services:
 #    volumes:
 #      - .:/app
 #    depends_on:
-#      - zg_mongodb
+#      - zg_redis_cache
+#      - zg_mysql_db_1
+#      - zg_mysql_db_2
 
-  zg_redis:
+  zg_redis_cache:
     image: redis:latest
-    container_name: zg_redis
+    container_name: zg_redis_cache
     ports:
-      - '6379:6379'
+      - '16379:6379'
+    networks:
+      - local-net
+
+  zg_mysql_db_1:
+    image: mysql:5.7
+    container_name: zg_mysql_db_1
+    env_file:
+      - .env-docker
+    ports:
+      - "${MYSQL_DB_1_PORT}:3306"
+    volumes:
+      - mysql_db_1_data:/var/lib/mysql
+    networks:
+      - local-net
+
+  zg_mysql_db_2:
+    image: mysql:5.7
+    container_name: zg_mysql_db_2
+    env_file:
+      - .env-docker
+    ports:
+      - "${MYSQL_DB_2_PORT}:3306"
+    volumes:
+      - mysql_db_2_data:/var/lib/mysql
     networks:
       - local-net
 
 volumes:
-  mongodbdata:
+  mysql_db_1_data:
+  mysql_db_2_data:
 
