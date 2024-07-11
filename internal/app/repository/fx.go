@@ -29,14 +29,14 @@ func NewModule() fx.Option {
 				NewMySQLRepository,
 				fx.As(new(Repository)),
 			),
-			fx.Invoke(
-				func(lc fx.Lifecycle, r Repository) {
-					lc.Append(fx.StartStopHook(r.Start, r.Start))
-				},
-			),
-			fx.Decorate(func(log *zap.Logger) *zap.Logger {
-				return log.Named("repo")
-			}),
 		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, r Repository) {
+				lc.Append(fx.StartStopHook(r.Start, r.Start))
+			},
+		),
+		fx.Decorate(func(log *zap.Logger) *zap.Logger {
+			return log.Named("repo")
+		}),
 	)
 }

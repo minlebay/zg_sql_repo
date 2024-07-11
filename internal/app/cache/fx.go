@@ -27,14 +27,14 @@ func NewModule() fx.Option {
 				NewRedis,
 				fx.As(new(Cache)),
 			),
-			fx.Invoke(
-				func(lc fx.Lifecycle, c Cache) {
-					lc.Append(fx.StartStopHook(c.Start, c.Stop))
-				},
-			),
-			fx.Decorate(func(log *zap.Logger) *zap.Logger {
-				return log.Named("redis")
-			}),
 		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, c Cache) {
+				lc.Append(fx.StartStopHook(c.Start, c.Stop))
+			},
+		),
+		fx.Decorate(func(log *zap.Logger) *zap.Logger {
+			return log.Named("redis")
+		}),
 	)
 }
