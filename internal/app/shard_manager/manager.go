@@ -2,11 +2,12 @@ package shard_manager
 
 import (
 	"context"
+	"encoding/json"
 	"go.uber.org/zap"
 	"hash/crc32"
 	"strconv"
 	"sync"
-	"zg_sql_repo/internal/app/redis"
+	"zg_sql_repo/internal/app/cache"
 	"zg_sql_repo/internal/app/repository"
 	"zg_sql_repo/internal/model"
 )
@@ -14,21 +15,21 @@ import (
 type Manager struct {
 	Config     *Config
 	Logger     *zap.Logger
-	Redis      *redis.Redis
-	Repository *repository.Repository
+	Cache      cache.Cache
+	Repository repository.Repository
 	wg         sync.WaitGroup
 }
 
 func NewManager(
 	logger *zap.Logger,
 	config *Config,
-	redis *redis.Redis,
-	repo *repository.Repository,
+	cache cache.Cache,
+	repo repository.Repository,
 ) *Manager {
 	return &Manager{
 		Config:     config,
 		Logger:     logger,
-		Redis:      redis,
+		Cache:      cache,
 		Repository: repo,
 	}
 }
@@ -42,7 +43,7 @@ func (m *Manager) StopManager(ctx context.Context) {
 	m.Logger.Info("Shard manager stopped")
 }
 
-func (m *Manager) Consume(ctx context.Context, msg *model.Message) {
+func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 	m.wg.Add(1)
 	defer m.wg.Done()
 
@@ -50,28 +51,37 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) {
 	shardIndex, err := m.GetShardIndex(ctx, msg.Uuid)
 	if err != nil {
 		m.Logger.Error("Failed to get shard index", zap.Error(err))
-		return
+		return err
 	}
 
 	created, err := m.Repository.Create(ctx, msg)
 	if err != nil {
 		m.Logger.Error("Failed to store message", zap.Error(err))
-		return
+		return err
 	}
-	m.Logger.Info("Message stored", zap.String("uuid", created.Uuid), zap.Int("shard", shardIndex))
 
-	bytes := []byte(strconv.Itoa(shardIndex))
-	err = m.Redis.Put(created.Uuid, bytes)
+	bytes, err := json.Marshal(created)
+	if err != nil {
+		m.Logger.Error("Failed to marshal message", zap.Error(err))
+		return err
+	}
+	m.Cache.Put(created.Uuid, bytes)
+
+	m.Logger.Info("Message stored and cached", zap.String("uuid", created.Uuid), zap.Int("shard", shardIndex))
+
+	bytes = []byte(strconv.Itoa(shardIndex))
+	err = m.Cache.Put(created.Uuid, bytes)
 	if err != nil {
 		m.Logger.Error("Failed to store index", zap.Error(err))
-		return
+		return err
 	}
 	m.Logger.Info("Index stored", zap.String("uuid", created.Uuid), zap.Int("shard", shardIndex))
+	return nil
 }
 
 func (m *Manager) GetShardIndex(ctx context.Context, uuid string) (int, error) {
 	uuidBytes := []byte(uuid)
 	hash := crc32.ChecksumIEEE(uuidBytes)
-	shardNumber := int(hash) % len(m.Repository.DBs)
+	shardNumber := int(hash) % len(m.Repository.GetDbs())
 	return shardNumber, nil
 }

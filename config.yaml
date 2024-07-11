@@ -21,6 +21,7 @@ dbs:
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
 
-redis:
+cache:
   address: ${ZG_REDIS_ADDRESS}
   db: ${ZG_REDIS_DB}
+  exp_time: ${ZG_REDIS_EXP_TIME}

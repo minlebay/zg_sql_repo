@@ -1,9 +1,23 @@
 package repository
 
 import (
+	"context"
+	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"zg_sql_repo/internal/model"
 )
+
+type Repository interface {
+	Start(ctx context.Context)
+	Stop(ctx context.Context)
+	GetAll(ctx context.Context) ([]*model.Message, error)
+	Create(ctx context.Context, entity *model.Message) (*model.Message, error)
+	GetById(ctx context.Context, id string) (*model.Message, error)
+	Update(ctx context.Context, id string, entity *model.Message) (*model.Message, error)
+	Delete(ctx context.Context, id string) error
+	GetDbs() []*gorm.DB
+}
 
 func NewModule() fx.Option {
 
@@ -11,15 +25,18 @@ func NewModule() fx.Option {
 		"repo",
 		fx.Provide(
 			NewRepositoryConfig,
-			NewRepository,
+			fx.Annotate(
+				NewMySQLRepository,
+				fx.As(new(Repository)),
+			),
+			fx.Invoke(
+				func(lc fx.Lifecycle, r Repository) {
+					lc.Append(fx.StartStopHook(r.Start, r.Start))
+				},
+			),
+			fx.Decorate(func(log *zap.Logger) *zap.Logger {
+				return log.Named("repo")
+			}),
 		),
-		fx.Invoke(
-			func(lc fx.Lifecycle, r *Repository) {
-				lc.Append(fx.StartStopHook(r.StartRepository, r.StartRepository))
-			},
-		),
-		fx.Decorate(func(log *zap.Logger) *zap.Logger {
-			return log.Named("repo")
-		}),
 	)
 }

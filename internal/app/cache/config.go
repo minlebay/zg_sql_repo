@@ -1,16 +1,17 @@
-package redis
+package cache
 
 import cfg "go.uber.org/config"
 
 type Config struct {
 	Address string `yaml:"address"`
 	DB      string `yaml:"db"`
+	ExpTime string `yaml:"exp_time"`
 }
 
-func NewRedisConfig(provider cfg.Provider) (*Config, error) {
+func NewCacheConfig(provider cfg.Provider) (*Config, error) {
 	config := Config{}
 
-	if err := provider.Get("redis").Populate(&config); err != nil {
+	if err := provider.Get("cache").Populate(&config); err != nil {
 		return nil, err
 	}
 

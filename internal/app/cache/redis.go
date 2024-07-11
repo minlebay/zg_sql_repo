@@ -1,4 +1,4 @@
-package redis
+package cache
 
 import (
 	"context"
@@ -7,13 +7,15 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type Redis struct {
-	Config *Config
-	Logger *zap.Logger
-	db     *redis.Client
-	wg     sync.WaitGroup
+	Config  *Config
+	Logger  *zap.Logger
+	db      *redis.Client
+	wg      sync.WaitGroup
+	expires time.Duration
 }
 
 func NewRedis(logger *zap.Logger, config *Config) *Redis {
@@ -23,11 +25,16 @@ func NewRedis(logger *zap.Logger, config *Config) *Redis {
 	}
 }
 
-func (r *Redis) StartRedis(ctx context.Context) {
+func (r *Redis) Start(ctx context.Context) {
 	go func() {
 		numdb, err := strconv.ParseInt(r.Config.DB, 10, 64)
 		if err != nil {
 			r.Logger.Error("Failed to parse DB", zap.Error(err))
+		}
+
+		r.expires, err = time.ParseDuration(r.Config.ExpTime)
+		if err != nil {
+			r.Logger.Error("Failed to parse expiration time", zap.Error(err))
 		}
 
 		r.db = redis.NewClient(&redis.Options{
@@ -37,7 +44,7 @@ func (r *Redis) StartRedis(ctx context.Context) {
 	}()
 }
 
-func (r *Redis) StopRedis(ctx context.Context) {
+func (r *Redis) Stop(ctx context.Context) {
 	r.wg.Wait()
 	err := r.db.Close()
 	if err != nil {
@@ -45,26 +52,26 @@ func (r *Redis) StopRedis(ctx context.Context) {
 	}
 }
 
-func (s *Redis) Get(key string) (out []byte, err error) {
-	out, err = s.db.Get(key).Bytes()
+func (r *Redis) Get(key string) (out []byte, err error) {
+	out, err = r.db.Get(key).Bytes()
 	return
 }
 
-func (s *Redis) Put(key string, value []byte) (err error) {
-	err = s.db.Set(key, string(value), 0).Err()
+func (r *Redis) Put(key string, value []byte) (err error) {
+	err = r.db.Set(key, string(value), r.expires).Err()
 	return
 }
 
-func (s *Redis) Delete(key string) (err error) {
-	err = s.db.Del(key).Err()
+func (r *Redis) Delete(key string) (err error) {
+	err = r.db.Del(key).Err()
 	return
 }
 
-func (s *Redis) Iterate(filter string) (out []string, err error) {
+func (r *Redis) Iterate(filter string) (out []string, err error) {
 	if filter != "" {
 		filter += "*"
 	}
-	iter := s.db.Scan(0, filter, 0).Iterator()
+	iter := r.db.Scan(0, filter, 0).Iterator()
 	for iter.Next() {
 		key := iter.Val()
 		out = append(out, key)

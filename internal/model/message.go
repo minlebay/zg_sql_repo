@@ -8,17 +8,17 @@ import (
 )
 
 type Message struct {
-	Uuid           string
-	ContentType    string
+	Uuid           string `json:"uuid"`
+	ContentType    string `json:"content_type"`
 	MessageContent MessageContent
 }
 
 type MessageContent struct {
-	SendAt   *timestamp.Timestamp
-	Provider string
-	Consumer string
-	Title    string
-	Content  string
+	SendAt   *timestamp.Timestamp `json:"send_at"`
+	Provider string               `json:"provider"`
+	Consumer string               `json:"consumer"`
+	Title    string               `json:"title"`
+	Content  string               `json:"content"`
 }
 
 func (m *Message) Marshal() ([]byte, error) {
