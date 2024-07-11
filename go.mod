@@ -7,6 +7,7 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/gorm v1.9.16
+	github.com/pressly/goose v2.7.0+incompatible
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/config v1.4.0
@@ -24,6 +25,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.33.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.uber.org/dig v1.17.1 // indirect

@@ -52,8 +52,8 @@ func (r *Stub) GetAll(ctx context.Context) ([]*model.Message, error) {
 	return []*model.Message{stubMessage}, nil
 }
 
-func (r *Stub) Create(ctx context.Context, entity *model.Message) (*model.Message, error) {
-	return stubMessage, nil
+func (r *Stub) Create(ctx context.Context, shard int, entity *model.Message) error {
+	return nil
 }
 
 func (r *Stub) GetById(ctx context.Context, id string) (*model.Message, error) {
@@ -70,4 +70,8 @@ func (r *Stub) Delete(ctx context.Context, id string) error {
 
 func (r *Stub) GetDbs() []*gorm.DB {
 	return r.dbs
+}
+
+func (r *Stub) DoMigrations(pathToMigrations string, db *gorm.DB) error {
+	return nil
 }

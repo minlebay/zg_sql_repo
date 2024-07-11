@@ -8,17 +8,17 @@ import (
 )
 
 type Message struct {
-	Uuid           string `json:"uuid"`
-	ContentType    string `json:"content_type"`
-	MessageContent MessageContent
+	Uuid           string         `json:"uuid" gorm:"primaryKey;type:varchar(255)"`
+	ContentType    string         `json:"content_type" gorm:"type:varchar(255)"`
+	MessageContent MessageContent `gorm:"embedded;embeddedPrefix:message_content_"`
 }
 
 type MessageContent struct {
-	SendAt   *timestamp.Timestamp `json:"send_at"`
-	Provider string               `json:"provider"`
-	Consumer string               `json:"consumer"`
-	Title    string               `json:"title"`
-	Content  string               `json:"content"`
+	SendAt   *timestamp.Timestamp `json:"send_at" gorm:"type:timestamp"`
+	Provider string               `json:"provider" gorm:"type:varchar(255)"`
+	Consumer string               `json:"consumer" gorm:"type:varchar(255)"`
+	Title    string               `json:"title" gorm:"type:varchar(255)"`
+	Content  string               `json:"content" gorm:"type:text"`
 }
 
 func (m *Message) Marshal() ([]byte, error) {

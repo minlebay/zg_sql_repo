@@ -5,10 +5,12 @@ import (
 )
 
 type Db struct {
-	DB       string `yaml:"database"`
-	Port     string `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
+	Host           string `yaml:"host"`
+	DB             string `yaml:"database"`
+	Port           string `yaml:"port"`
+	User           string `yaml:"user"`
+	Password       string `yaml:"password"`
+	MigrationsPath string `yaml:"migrations_path"`
 }
 
 type Config struct {

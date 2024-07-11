@@ -16,12 +16,14 @@ dbs:
     database: ${MYSQL_DATABASE}
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+    migrations_path: ./db/migrations
 
   - host: ${MYSQL_DB_2_HOST}
     port: ${MYSQL_DB_2_PORT}
     database: ${MYSQL_DATABASE}
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
+    migrations_path: ./db/migrations
 
 cache:
   address: ${ZG_REDIS_ADDRESS}

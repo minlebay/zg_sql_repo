@@ -12,11 +12,12 @@ type Repository interface {
 	Start(ctx context.Context)
 	Stop(ctx context.Context)
 	GetAll(ctx context.Context) ([]*model.Message, error)
-	Create(ctx context.Context, entity *model.Message) (*model.Message, error)
+	Create(ctx context.Context, shard int, entity *model.Message) error
 	GetById(ctx context.Context, id string) (*model.Message, error)
 	Update(ctx context.Context, id string, entity *model.Message) (*model.Message, error)
 	Delete(ctx context.Context, id string) error
 	GetDbs() []*gorm.DB
+	DoMigrations(pathToMigrations string, db *gorm.DB) error
 }
 
 func NewModule() fx.Option {
