@@ -1,4 +1,4 @@
-package cache
+package keyvalue_db
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"go.uber.org/zap"
 )
 
-var _ Cache = (*Redis)(nil)
+var _ KValueDB = (*Redis)(nil)
 
-type Cache interface {
+type KValueDB interface {
 	Start(ctx context.Context)
 	Stop(ctx context.Context)
 	Get(key string) (out []byte, err error)
@@ -20,21 +20,21 @@ type Cache interface {
 func NewModule() fx.Option {
 
 	return fx.Module(
-		"cache",
+		"redis",
 		fx.Provide(
-			NewCacheConfig,
+			NewKeyValueDbConfig,
 			fx.Annotate(
 				NewRedis,
-				fx.As(new(Cache)),
+				fx.As(new(KValueDB)),
 			),
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, c Cache) {
+			func(lc fx.Lifecycle, c KValueDB) {
 				lc.Append(fx.StartStopHook(c.Start, c.Stop))
 			},
 		),
 		fx.Decorate(func(log *zap.Logger) *zap.Logger {
-			return log.Named("cache")
+			return log.Named("redis")
 		}),
 	)
 }
