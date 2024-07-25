@@ -3,10 +3,11 @@ package app
 import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"testing"
 	"zg_sql_repo/internal/app/cache"
 	"zg_sql_repo/internal/app/kafka"
+	"zg_sql_repo/internal/app/keyvalue_db"
+	"zg_sql_repo/internal/app/log"
 	"zg_sql_repo/internal/app/repository"
 	"zg_sql_repo/internal/app/shard_manager"
 )
@@ -15,12 +16,13 @@ func TestValidateApp(t *testing.T) {
 	err := fx.ValidateApp(
 		fx.Options(
 			kafka.NewModule(),
+			keyvalue_db.NewModule(),
 			cache.NewModule(),
 			repository.NewModule(),
 			shard_manager.NewModule(),
+			log.NewModule(),
 		),
 		fx.Provide(
-			zap.NewProduction,
 			NewConfig,
 		),
 	)

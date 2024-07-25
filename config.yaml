@@ -33,3 +33,6 @@ cache:
 kvdb:
   address: ${ZG_REDIS_ADDRESS}
   db: ${ZG_REDIS_DB}
+
+logstash:
+    url: ${LOGSTASH_URL}

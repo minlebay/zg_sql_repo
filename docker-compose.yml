@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 networks:
   local-net:
@@ -6,25 +6,27 @@ networks:
 
 services:
 
-#  zg_sql_repo:
-#    build:
-#      context: .
-#      dockerfile: ./Dockerfile
-#    container_name: zg_sql_repo
-#    env_file:
-#      - .env-docker
-#    networks:
-#      - local-net
-#    volumes:
-#      - .:/app
-#    depends_on:
-#      - zg_redis_cache
-#      - zg_mysql_db_1
-#      - zg_mysql_db_2
+  zg_sql_repo:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: zg_sql_repo
+    env_file:
+      - .env-docker
+    networks:
+      - local-net
+    volumes:
+      - .:/app
+    depends_on:
+      - zg_sql_repo_redis
+      - zg_mysql_db_1
+      - zg_mysql_db_2
 
   zg_sql_repo_redis:
     image: redis:latest
     container_name: zg_sql_repo_redis
+    env_file:
+      - .env-docker
     ports:
       - '16379:6379'
     networks:

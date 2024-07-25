@@ -34,7 +34,7 @@ func NewModule() fx.Option {
 			},
 		),
 		fx.Decorate(func(log *zap.Logger) *zap.Logger {
-			return log.Named("cache")
+			return log.Named("sql_cache")
 		}),
 	)
 }
