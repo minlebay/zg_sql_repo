@@ -3,6 +3,9 @@ package shard_manager
 import (
 	"context"
 	"encoding/json"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"hash/crc32"
 	"strconv"
@@ -19,6 +22,7 @@ type Manager struct {
 	Cache      cache.Cache
 	KeyValueDB keyvalue_db.KValueDB
 	Repository repository.Repository
+	Tracer     trace.Tracer
 	wg         sync.WaitGroup
 }
 
@@ -29,20 +33,22 @@ func NewManager(
 	kvdb keyvalue_db.KValueDB,
 	repo repository.Repository,
 ) *Manager {
+	tracer := otel.Tracer("sql_shard-manager")
 	return &Manager{
 		Config:     config,
 		Logger:     logger,
 		Cache:      cache,
 		KeyValueDB: kvdb,
 		Repository: repo,
+		Tracer:     tracer,
 	}
 }
 
-func (m *Manager) StartManager(ctx context.Context) {
+func (m *Manager) StartManager() {
 	m.Logger.Info("Shard manager started")
 }
 
-func (m *Manager) StopManager(ctx context.Context) {
+func (m *Manager) StopManager() {
 	m.wg.Wait()
 	m.Logger.Info("Shard manager stopped")
 }
@@ -51,7 +57,6 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 	m.wg.Add(1)
 	defer m.wg.Done()
 
-	// Calculate shard number
 	shardIndex, err := m.GetShardIndex(ctx, msg.Uuid)
 	if err != nil {
 		m.Logger.Error("Failed to get shard index", zap.Error(err))
@@ -63,6 +68,11 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 		m.Logger.Error("Failed to store message", zap.Error(err))
 		return err
 	}
+
+	ctx, span := m.Tracer.Start(ctx, "Consume to "+strconv.Itoa(shardIndex))
+	span.SetAttributes(attribute.String("message_id", msg.Uuid))
+	span.SetAttributes(attribute.Int("shard_index", shardIndex))
+	defer span.End()
 
 	bytes, err := json.Marshal(msg)
 	if err != nil {

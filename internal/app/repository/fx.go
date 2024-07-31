@@ -33,7 +33,7 @@ func NewModule() fx.Option {
 		),
 		fx.Invoke(
 			func(lc fx.Lifecycle, r Repository) {
-				lc.Append(fx.StartStopHook(r.Start, r.Start))
+				lc.Append(fx.StartStopHook(r.Start, r.Stop))
 			},
 		),
 		fx.Decorate(func(log *zap.Logger) *zap.Logger {

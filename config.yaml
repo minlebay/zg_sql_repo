@@ -31,3 +31,7 @@ kvdb:
 
 logstash:
     url: ${LOGSTASH_URL}
+
+tracer:
+  url: ${TRACER_URL}
+  enabled: true
