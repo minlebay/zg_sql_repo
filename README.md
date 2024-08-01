@@ -2,7 +2,7 @@
 
 # SQL Repository Service
 
-The SQL Repository Service is a part of the Message Generator and Router Project. It integrates with MySQL and Redis to store and index data, and it uses Kafka for message brokering.
+The SQL Repository Service is a part of the ZmeyGorynych Project. It integrates with MySQL and Redis to store and index data, and it uses Kafka for message brokering.
 
 ## Components
 
