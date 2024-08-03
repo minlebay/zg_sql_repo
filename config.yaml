@@ -1,37 +1,37 @@
 kafka:
-  address: ${ZG_KAFKA_ADDRESS}
+  address: ${ZG_KAFKA_ADDRESS:127.0.0.1:9092}
   group_id: sql_repo
   user: guest
   password: guest
   topic: processing_1
 
 dbs:
-  - host: ${MYSQL_DB_1_HOST}
-    port: ${MYSQL_DB_1_PORT}
-    database: ${MYSQL_DATABASE}
-    user: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+  - host: ${MYSQL_DB_1_HOST:localhost}
+    port: ${MYSQL_DB_1_PORT:3306}
+    database: ${MYSQL_DATABASE:db}
+    user: ${MYSQL_USER:user}
+    password: ${MYSQL_PASSWORD:password}
     migrations_path: ./db/migrations
 
-  - host: ${MYSQL_DB_2_HOST}
-    port: ${MYSQL_DB_2_PORT}
-    database: ${MYSQL_DATABASE}
-    user: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+  - host: ${MYSQL_DB_2_HOST:localhost}
+    port: ${MYSQL_DB_2_PORT:3307}
+    database: ${MYSQL_DATABASE:db}
+    user: ${MYSQL_USER:user}
+    password: ${MYSQL_PASSWORD:password}
     migrations_path: ./db/migrations
 
 cache:
-  address: ${ZG_REDIS_ADDRESS}
-  db: ${ZG_REDIS_CACHE_DB}
-  exp_time: ${ZG_REDIS_EXP_TIME}
+  address: ${ZG_REDIS_URL:localhost:16379}
+  db: ${ZG_REDIS_CACHE_DB:1}
+  exp_time: ${ZG_REDIS_EXP_TIME:3600s}
 
 kvdb:
-  address: ${ZG_REDIS_ADDRESS}
-  db: ${ZG_REDIS_DB}
+  address: ${ZG_REDIS_URL:localhost:16379}
+  db: ${ZG_REDIS_DB:0}
 
 logstash:
-    url: ${LOGSTASH_URL}
+    url: ${LOGSTASH_URL:http://localhost:5000}
 
 tracer:
-  url: ${TRACER_URL}
+  url: ${TRACER_URL:http://localhost:14268/api/traces}
   enabled: true
