@@ -99,6 +99,10 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 func (m *Manager) GetShardIndex(ctx context.Context, uuid string) (int, error) {
 	uuidBytes := []byte(uuid)
 	hash := crc32.ChecksumIEEE(uuidBytes)
-	shardNumber := int(hash) % len(m.Repository.GetDbs())
+	dbsCount := len(m.Repository.GetDbs())
+	if dbsCount == 0 {
+		return 0, nil
+	}
+	shardNumber := int(hash) % dbsCount
 	return shardNumber, nil
 }
