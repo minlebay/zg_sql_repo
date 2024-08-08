@@ -57,22 +57,21 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 	m.wg.Add(1)
 	defer m.wg.Done()
 
+	ctx, span := m.Tracer.Start(ctx, "Consume message")
+	defer span.End()
+
 	shardIndex, err := m.GetShardIndex(ctx, msg.Uuid)
 	if err != nil {
 		m.Logger.Error("Failed to get shard index", zap.Error(err))
 		return err
 	}
+	span.SetAttributes(attribute.Int("shard_index", shardIndex))
 
 	err = m.Repository.Create(ctx, shardIndex, msg)
 	if err != nil {
 		m.Logger.Error("Failed to store message", zap.Error(err))
 		return err
 	}
-
-	ctx, span := m.Tracer.Start(ctx, "Consume to "+strconv.Itoa(shardIndex))
-	span.SetAttributes(attribute.String("message_id", msg.Uuid))
-	span.SetAttributes(attribute.Int("shard_index", shardIndex))
-	defer span.End()
 
 	bytes, err := json.Marshal(msg)
 	if err != nil {
@@ -97,12 +96,12 @@ func (m *Manager) Consume(ctx context.Context, msg *model.Message) error {
 }
 
 func (m *Manager) GetShardIndex(ctx context.Context, uuid string) (int, error) {
-	uuidBytes := []byte(uuid)
-	hash := crc32.ChecksumIEEE(uuidBytes)
 	dbsCount := len(m.Repository.GetDbs())
 	if dbsCount == 0 {
 		return 0, nil
 	}
+	uuidBytes := []byte(uuid)
+	hash := crc32.ChecksumIEEE(uuidBytes)
 	shardNumber := int(hash) % dbsCount
 	return shardNumber, nil
 }
